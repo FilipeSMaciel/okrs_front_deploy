@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { DashboardData, DadosOperacionais, GeralResponse } from './types';
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3333' });
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'https://okr1-api.vercel.app' });
 
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('okrs_token');
