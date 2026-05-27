@@ -1,1 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-brand:      #CB0C13;
+  --color-brand-deep: #A30A10;
+  --color-brand-soft: rgba(203,12,19,0.08);
+  --color-brand-tint: #FEECEC;
+  --color-ink:        #0F0F10;
+  --color-ok:         #138F4A;
+  --color-ok-soft:    #E6F4EC;
+  --color-warn:       #C97700;
+  --color-warn-soft:  #FBEFD9;
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@theme {
+  --animate-slide-in: slide-in 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+* { box-sizing: border-box; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
