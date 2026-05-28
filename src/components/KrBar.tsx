@@ -46,8 +46,7 @@ export function KrBar({ tag, name, data, unit, min, max, invert }: Props) {
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-[10.5px] font-bold tracking-widest uppercase text-brand">{tag}</div>
-          <h3 className="text-[17px] font-semibold text-ink mt-1 leading-tight">{name}</h3>
+          <h3 className="text-[17px] font-semibold text-ink leading-tight">{name}</h3>
         </div>
         <div className="text-right shrink-0">
           <div className="text-[30px] font-bold text-ink leading-none">{fmt(data.atual, unit)}</div>

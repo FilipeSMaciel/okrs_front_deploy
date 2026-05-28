@@ -72,8 +72,7 @@ export function KrRing({ tag, name, data, unit, min, max, invert, details }: Pro
       >
         <div className="flex justify-between items-start gap-3">
           <div>
-            <div className="text-[10.5px] font-bold tracking-widest uppercase text-brand">{tag}</div>
-            <h3 className="text-[17px] font-semibold text-ink mt-1 leading-tight">{name}</h3>
+            <h3 className="text-[17px] font-semibold text-ink leading-tight">{name}</h3>
           </div>
           {data.meta !== null && (
             <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shrink-0 ${pillBg}`}>

@@ -357,9 +357,7 @@ function Dashboard() {
             {/* BLOCK 1.3 — FINANCEIRO */}
             <section className="mt-7">
               <div className="flex items-baseline gap-3.5 mb-3.5">
-                <span className="font-mono text-[11px] font-semibold text-brand bg-brand-tint px-2 py-1 rounded-md tracking-wider">1.3</span>
                 <h2 className="text-[20px] font-bold text-ink">Prosperidade com Segurança</h2>
-                <span className="text-[13px] text-gray-500 ml-auto">4 KRs · barra de progresso vs meta</span>
               </div>
 
               {isFetching && !data ? (
@@ -380,9 +378,7 @@ function Dashboard() {
             {/* BLOCK 1.4 — OPERACIONAL */}
             <section className="mt-7">
               <div className="flex items-baseline gap-3.5 mb-3.5">
-                <span className="font-mono text-[11px] font-semibold text-brand bg-brand-tint px-2 py-1 rounded-md tracking-wider">1.4</span>
                 <h2 className="text-[20px] font-bold text-ink">Operar com Excelência</h2>
-                <span className="text-[13px] text-gray-500 ml-auto">3 KRs · anel de progresso</span>
               </div>
 
               {opFetching && !opData ? (
