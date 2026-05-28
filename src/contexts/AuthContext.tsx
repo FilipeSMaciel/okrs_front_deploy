@@ -37,7 +37,7 @@ const LEVEL: Record<UserType, number> = {
 
 const TOKEN_KEY  = 'okrs_token';
 const USER_KEY   = 'okrs_user';
-const API_BASE   = import.meta.env.VITE_API_URL ?? 'https://okr1-api.vercel.app';
+const API_BASE   = import.meta.env.VITE_API_URL ?? 'https://okrsapideploy.vercel.app';
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
