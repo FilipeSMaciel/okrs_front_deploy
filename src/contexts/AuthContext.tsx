@@ -35,8 +35,9 @@ const LEVEL: Record<UserType, number> = {
   ADMIN_1: 3,
 };
 
-const TOKEN_KEY = 'okrs_token';
-const USER_KEY  = 'okrs_user';
+const TOKEN_KEY  = 'okrs_token';
+const USER_KEY   = 'okrs_user';
+const API_BASE   = import.meta.env.VITE_API_URL ?? 'http://localhost:3333';
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -53,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Valida o token ao carregar (pode ter expirado)
   useEffect(() => {
     if (!state.token) return;
-    fetch('http://localhost:3333/auth/me', {
+    fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${state.token}` },
     })
       .then(r => { if (!r.ok) throw new Error('expired'); return r.json(); })
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []); // só na montagem
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await fetch('http://localhost:3333/auth/login', {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, password }),
