@@ -151,10 +151,10 @@ function Dashboard() {
   const metaFin   = (v: number | null) => isCurrent ? v : null;
 
   const KRS_BAR = f ? [
-    { tag: 'KR · Cartão',        name: 'Participação Cartão',  data: { atual: f.cartaoPct.atual,     meta: metaFin(f.cartaoPct.meta)     }, unit: '%'  as const, min: 0, max: 100, invert: false },
-    { tag: 'KR · À Vista',       name: 'Participação À Vista', data: { atual: f.avistaPct.atual,     meta: metaFin(f.avistaPct.meta)     }, unit: '%'  as const, min: 0, max: 100, invert: false },
-    { tag: 'KR · Ticket Médio',  name: 'Ticket Médio',         data: { atual: f.ticketMedio.atual,   meta: metaFin(f.ticketMedio.meta)   }, unit: 'R$' as const, min: 0, max: 2000, invert: false },
-    { tag: 'KR · Inadimplência', name: 'Inadimplência',        data: { atual: f.inadimplencia.atual, meta: metaFin(f.inadimplencia.meta) }, unit: '%'  as const, min: 0, max: 20,  invert: true  },
+    { name: 'Participação Cartão',  data: { atual: f.cartaoPct.atual,     meta: metaFin(f.cartaoPct.meta)     }, unit: '%'  as const, min: 0, max: 100, invert: false },
+    { name: 'Participação À Vista', data: { atual: f.avistaPct.atual,     meta: metaFin(f.avistaPct.meta)     }, unit: '%'  as const, min: 0, max: 100, invert: false },
+    { name: 'Ticket Médio',         data: { atual: f.ticketMedio.atual,   meta: metaFin(f.ticketMedio.meta)   }, unit: 'R$' as const, min: 0, max: 2000, invert: false },
+    { name: 'Inadimplência',        data: { atual: f.inadimplencia.atual, meta: metaFin(f.inadimplencia.meta) }, unit: '%'  as const, min: 0, max: 20,  invert: true  },
   ] : [];
 
   return (
@@ -366,7 +366,7 @@ function Dashboard() {
                 </div>
               ) : data ? (
                 <div className="grid grid-cols-2 gap-4">
-                  {KRS_BAR.map(kr => <KrBar key={kr.tag} {...kr} />)}
+                  {KRS_BAR.map(kr => <KrBar key={kr.name} {...kr} />)}
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-400">

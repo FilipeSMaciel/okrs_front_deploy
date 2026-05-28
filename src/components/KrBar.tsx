@@ -1,7 +1,6 @@
 import type { KrValue } from '../types';
 
 interface Props {
-  tag:    string;
   name:   string;
   data:   KrValue;
   unit:   '%' | 'R$';
@@ -31,7 +30,7 @@ function pct(v: number, lo: number, hi: number) {
   return Math.max(0, Math.min(1, (v - lo) / (hi - lo))) * 100;
 }
 
-export function KrBar({ tag, name, data, unit, min, max, invert }: Props) {
+export function KrBar({ name, data, unit, min, max, invert }: Props) {
   const st = getStatus(data, invert);
   const fillPct = pct(data.atual ?? 0, min, max);
   const goalPct = pct(data.meta ?? 0, min, max);
