@@ -109,7 +109,8 @@ export function LuzterModal({
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number, name: string) => {
+                    formatter={(value: number | undefined, name: string) => {
+                      if (value == null) return ['—', name];
                       const seg = pieData.find(d => d.name === name);
                       return [`${fmtR$(value)} · ${seg?.pct.toFixed(1) ?? 0}%`, name];
                     }}
