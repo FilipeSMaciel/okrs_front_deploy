@@ -188,10 +188,10 @@ export function BinniModal({
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number | undefined, name: string) => {
+                    formatter={(value: any, name: any) => {
                       if (value == null) return ['—', name];
                       const seg = pieData.find(d => d.name === name);
-                      return [`${fmtR$(value)} · ${seg?.pct.toFixed(1) ?? 0}%`, name];
+                      return [`${fmtR$(Number(value))} · ${seg?.pct.toFixed(1) ?? 0}%`, name];
                     }}
                     contentStyle={{ borderRadius: 8, border: '1px solid #E5E7EB', fontSize: 12, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     itemStyle={{ color: '#374151', fontWeight: 600 }}
