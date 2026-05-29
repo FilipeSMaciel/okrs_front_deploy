@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw, TrendingUp, AlertTriangle, CheckCircle2, Clock, Store } from 'lucide-react';
+import { RefreshCw, TrendingUp, AlertTriangle, CheckCircle2, Clock, Store, Zap } from 'lucide-react';
 import { getGeral } from '../api';
+import { useState } from 'react';
 import type { GeralLoja } from '../types';
 
 // Metas (espelho das constantes da App)
@@ -62,7 +63,19 @@ interface Props {
   onSelectStore: (cnpj: string) => void;
 }
 
+async function recalcularTodas(trimestre: string) {
+  const token = localStorage.getItem('okrs_token');
+  const base  = import.meta.env.VITE_API_URL || 'https://okrsapideploy.vercel.app';
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+  await Promise.all([
+    fetch(`${base}/consulta/batch/${trimestre}`,    { method: 'POST', headers }),
+    fetch(`${base}/operacional/batch/${trimestre}`, { method: 'POST', headers }),
+  ]);
+}
+
 export function AllStoresPage({ trimestre, onSelectStore }: Props) {
+  const [recalculating, setRecalculating] = useState(false);
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: ['geral', trimestre],
     queryFn:  () => getGeral(trimestre),
@@ -71,9 +84,18 @@ export function AllStoresPage({ trimestre, onSelectStore }: Props) {
 
   const lojas: GeralLoja[] = data?.lojas ?? [];
 
-  // Contar status geral
-  const semDados  = lojas.filter(l => !l.financeiro && !l.operacional).length;
-  const comDados  = lojas.length - semDados;
+  const semDados = lojas.filter(l => !l.financeiro && !l.operacional).length;
+  const comDados = lojas.length - semDados;
+
+  async function handleRecalcularTodas() {
+    setRecalculating(true);
+    try {
+      await recalcularTodas(trimestre);
+      await refetch();
+    } finally {
+      setRecalculating(false);
+    }
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -90,6 +112,15 @@ export function AllStoresPage({ trimestre, onSelectStore }: Props) {
           <span className="text-[12px] text-gray-400 font-mono">
             {comDados}/{lojas.length} lojas com dados
           </span>
+          <button
+            onClick={handleRecalcularTodas}
+            disabled={recalculating || isFetching}
+            className="flex items-center gap-2 bg-ink text-white text-[13px] font-semibold px-4 py-2 rounded-lg hover:bg-ink/80 transition-colors disabled:opacity-60"
+            title="Busca dados de todas as lojas via ssOtica e atualiza o cache"
+          >
+            <Zap size={14} className={recalculating ? 'animate-pulse' : ''} />
+            {recalculating ? 'Calculando...' : 'Recalcular Todas'}
+          </button>
           <button
             onClick={() => refetch()}
             disabled={isFetching}

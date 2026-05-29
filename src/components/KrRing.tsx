@@ -9,14 +9,16 @@ export type { DetailItem };
 interface KrDetails extends Omit<DetailPanelProps, 'open' | 'onClose' | 'tag' | 'name'> {}
 
 interface Props {
-  tag:      string;
-  name:     string;
-  data:     KrValue;
-  unit:     '%' | 'R$';
-  min:      number;
-  max:      number;
-  invert:   boolean;
-  details?: KrDetails;
+  tag:             string;
+  name:            string;
+  data:            KrValue;
+  unit:            '%' | 'R$';
+  min:             number;
+  max:             number;
+  invert:          boolean;
+  warnThreshold?:  number; // ratio mínimo para amarelo (default 0.85)
+  details?:        KrDetails;
+  onDetailOpen?:   () => void;
 }
 
 function fmt(v: number | null, unit: '%' | 'R$'): string {
@@ -25,21 +27,21 @@ function fmt(v: number | null, unit: '%' | 'R$'): string {
   return (Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1)) + '%';
 }
 
-function getStatus(data: KrValue, invert: boolean) {
+function getStatus(data: KrValue, invert: boolean, warnThreshold = 0.85) {
   const { atual, meta } = data;
   if (atual === null) return { cls: 'pending', label: 'aguardando', color: '#D1D5DB' };
   if (meta  === null) return { cls: 'info',    label: '',           color: '#9CA3AF'  };
   const reached = invert ? atual <= meta : atual >= meta;
   if (reached) return { cls: 'ok',   label: 'no alvo',      color: '#138F4A' };
   const ratio = invert ? meta / Math.max(atual, 0.0001) : atual / Math.max(meta, 0.0001);
-  if (ratio >= 0.85) return { cls: 'warn', label: 'em andamento', color: '#C97700' };
+  if (ratio >= warnThreshold) return { cls: 'warn', label: 'em andamento', color: '#C97700' };
   return { cls: 'risk', label: 'atenção', color: '#CB0C13' };
 }
 
-export function KrRing({ tag, name, data, unit, min, max, invert, details }: Props) {
+export function KrRing({ tag, name, data, unit, min, max, invert, warnThreshold, details, onDetailOpen }: Props) {
   const [panelOpen, setPanelOpen] = useState(false);
 
-  const st = getStatus(data, invert);
+  const st = getStatus(data, invert, warnThreshold);
   const pct = (v: number) => Math.max(0, Math.min(1, (v - min) / (max - min)));
 
   const cx = 100, cy = 100, r = 80;
@@ -58,17 +60,17 @@ export function KrRing({ tag, name, data, unit, min, max, invert, details }: Pro
                : st.cls === 'risk' ? 'bg-brand-tint text-brand'
                : 'bg-gray-100 text-gray-500';
 
-  const clickable = !!details;
+  const clickable = !!details || !!onDetailOpen;
 
   return (
     <>
       <div
         className={`bg-white border border-gray-200 rounded-2xl p-5 shadow-sm transition-shadow flex flex-col
           ${clickable ? 'cursor-pointer hover:shadow-md hover:border-brand/30' : 'hover:shadow-md'}`}
-        onClick={clickable ? () => setPanelOpen(true) : undefined}
+        onClick={clickable ? () => { onDetailOpen ? onDetailOpen() : setPanelOpen(true); } : undefined}
         role={clickable ? 'button' : undefined}
         tabIndex={clickable ? 0 : undefined}
-        onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') setPanelOpen(true); } : undefined}
+        onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { onDetailOpen ? onDetailOpen() : setPanelOpen(true); } } : undefined}
       >
         <div className="flex justify-between items-start gap-3">
           <div>

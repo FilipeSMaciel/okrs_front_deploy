@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
-export type UserType = 'USER' | 'ADMIN_3' | 'ADMIN_2' | 'ADMIN_1';
+export type UserType = 'USER' | 'REGIONAL' | 'ADMIN_3' | 'ADMIN_2' | 'ADMIN_1';
 
 export interface AuthLoja {
   id:     string;
@@ -15,6 +15,7 @@ export interface AuthUser {
   email: string;
   type:  UserType;
   loja:  AuthLoja | null;
+  lojas: AuthLoja[]; // lojas do REGIONAL; vazio para outros tipos
 }
 
 interface AuthState {
@@ -29,10 +30,11 @@ interface AuthContextValue extends AuthState {
 }
 
 const LEVEL: Record<UserType, number> = {
-  USER:    0,
-  ADMIN_3: 1,
-  ADMIN_2: 2,
-  ADMIN_1: 3,
+  USER:     0,
+  REGIONAL: 1,
+  ADMIN_3:  2,
+  ADMIN_2:  3,
+  ADMIN_1:  4,
 };
 
 const TOKEN_KEY  = 'okrs_token';

@@ -57,20 +57,30 @@ export interface LojaSimples {
   cidade: string | null;
 }
 
-export interface UserApi {
+export interface RegiaoApi {
   id:    string;
-  name:  string;
-  email: string;
-  type:  'USER' | 'ADMIN_3' | 'ADMIN_2' | 'ADMIN_1';
-  loja:  LojaSimples | null;
+  nome:  string;
+  lojas: LojaSimples[];
+}
+
+export interface UserApi {
+  id:     string;
+  name:   string;
+  email:  string;
+  type:   'USER' | 'REGIONAL' | 'ADMIN_3' | 'ADMIN_2' | 'ADMIN_1';
+  loja:   LojaSimples | null;
+  lojas:  LojaSimples[];
+  regiao: { id: string; nome: string } | null;
 }
 
 export interface CreateUserPayload {
-  name:     string;
-  email:    string;
-  password: string;
-  type:     UserApi['type'];
-  lojaId?:  string | null;
+  name:      string;
+  email:     string;
+  password:  string;
+  type:      UserApi['type'];
+  lojaId?:   string | null;
+  lojaIds?:  string[];
+  regiaoId?: string | null;
 }
 
 export interface UpdateUserPayload {
@@ -78,6 +88,8 @@ export interface UpdateUserPayload {
   password?: string;
   type?:     UserApi['type'];
   lojaId?:   string | null;
+  lojaIds?:  string[];
+  regiaoId?: string | null;
 }
 
 export async function getUsers(): Promise<UserApi[]> {
@@ -102,4 +114,23 @@ export async function deleteUser(id: string): Promise<void> {
 export async function getLojas(): Promise<LojaSimples[]> {
   const { data } = await api.get<LojaSimples[]>('/auth/lojas');
   return data;
+}
+
+export async function getRegioes(): Promise<RegiaoApi[]> {
+  const { data } = await api.get<RegiaoApi[]>('/auth/regioes');
+  return data;
+}
+
+export async function createRegiao(payload: { nome: string; lojaIds: string[] }): Promise<RegiaoApi> {
+  const { data } = await api.post<RegiaoApi>('/auth/regioes', payload);
+  return data;
+}
+
+export async function updateRegiao(id: string, payload: { nome?: string; lojaIds?: string[] }): Promise<RegiaoApi> {
+  const { data } = await api.patch<RegiaoApi>(`/auth/regioes/${id}`, payload);
+  return data;
+}
+
+export async function deleteRegiao(id: string): Promise<void> {
+  await api.delete(`/auth/regioes/${id}`);
 }

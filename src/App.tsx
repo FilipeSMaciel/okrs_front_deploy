@@ -5,6 +5,8 @@ import { getDashboard, getOperacional } from './api';
 import { KrBar } from './components/KrBar';
 import { KrRing } from './components/KrRing';
 import { MetasDrawer } from './components/MetasDrawer';
+import { BinniModal } from './components/BinniModal';
+import { LuzterModal } from './components/LuzterModal';
 import { LoginPage } from './pages/LoginPage';
 import { AllStoresPage } from './pages/AllStoresPage';
 import { UsersPage } from './pages/UsersPage';
@@ -93,11 +95,17 @@ function Dashboard() {
   const canSeeAllStores = isAdmin('ADMIN_3');
   const canEditMetas    = isAdmin('ADMIN_2');
   const canManageUsers  = isAdmin('ADMIN_1');
+  const isRegional      = user?.type === 'REGIONAL';
 
-  // Loja inicial: USER fica fixo na sua loja; ADMIN começa na primeira
+  // Lojas visíveis: REGIONAL vê só as suas; demais veem todas
+  const visibleStores = isRegional && user.lojas?.length
+    ? STORES.filter(s => user.lojas.some(l => l.cnpj === s.cnpj))
+    : STORES;
+
+  // Loja inicial
   const getInitialStoreIdx = () => {
     if (user?.type === 'USER' && user.loja) {
-      const idx = STORES.findIndex(s => s.cnpj === user.loja!.cnpj);
+      const idx = visibleStores.findIndex(s => s.cnpj === user.loja!.cnpj);
       return idx >= 0 ? idx : 0;
     }
     return 0;
@@ -108,11 +116,13 @@ function Dashboard() {
   const [dropdownOpen,   setDropdownOpen]   = useState(false);
   const [trimDropOpen,   setTrimDropOpen]   = useState(false);
   const [lastTs,         setLastTs]         = useState(fmtTs());
-  const [metasOpen,      setMetasOpen]      = useState(false);
+  const [metasOpen,       setMetasOpen]       = useState(false);
+  const [binniModalOpen,  setBinniModalOpen]  = useState(false);
+  const [luzterModalOpen, setLuzterModalOpen] = useState(false);
   const [trimestre,      setTrimestre]      = useState(getCurrentTrimestre);
   const qc = useQueryClient();
 
-  const store = STORES[storeIdx];
+  const store = visibleStores[storeIdx] ?? visibleStores[0];
   const trimOpts = getTrimestreOptions();
 
   const { data, isFetching } = useQuery({
@@ -142,7 +152,7 @@ function Dashboard() {
 
   // Quando clica numa loja na visão geral, vai direto para ela
   function handleSelectStoreByCnpj(cnpj: string) {
-    const idx = STORES.findIndex(s => s.cnpj === cnpj);
+    const idx = visibleStores.findIndex(s => s.cnpj === cnpj);
     if (idx >= 0) { setStoreIdx(idx); setTab('loja'); }
   }
 
@@ -237,7 +247,7 @@ function Dashboard() {
 
                 {dropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-                    {STORES.map((s, i) => (
+                    {visibleStores.map((s, i) => (
                       <button
                         key={s.cnpj}
                         onClick={() => handleSelectStore(i)}
@@ -392,38 +402,21 @@ function Dashboard() {
                     name="Garantias e Cancelamentos"
                     data={{ atual: opData.garantiasCancelamentos.pct, meta: isCurrent ? META_GARANTIAS : null }}
                     unit="%" min={0} max={20} invert={true}
+                    warnThreshold={1 / 1.3}
                   />
                   <KrRing
                     tag="KR · Luzter"
                     name="Adesão Luzter"
                     data={{ atual: opData.luzter.pct, meta: isCurrent ? META_LUZTER : null }}
                     unit="%" min={0} max={100} invert={false}
-                    details={{
-                      items:       opData.luzter.detalhes.map(d => ({ label: d.referencia, valor: d.valor, pct: d.pct })),
-                      valorGrupo:  opData.luzter.valorLuzter,
-                      valorTotal:  opData.luzter.valorTotalLentes,
-                      pctGrupo:    opData.luzter.pct,
-                      labelGrupo:  'Total Luzter',
-                      labelTotal:  'Total em lentes',
-                      outrasPct:   opData.luzter.outras?.pct,
-                      outrasValor: opData.luzter.outras?.valor,
-                    }}
+                    onDetailOpen={() => setLuzterModalOpen(true)}
                   />
                   <KrRing
                     tag="KR · Binni"
                     name="Adesão Binni / Volt"
                     data={{ atual: opData.binni.pct, meta: isCurrent ? META_BINNI : null }}
                     unit="%" min={0} max={100} invert={false}
-                    details={{
-                      items:       opData.binni.detalhes.map(d => ({ label: d.grife, valor: d.valor, pct: d.pct })),
-                      valorGrupo:  opData.binni.valorBinni,
-                      valorTotal:  opData.binni.valorTotalArmacoes,
-                      pctGrupo:    opData.binni.pct,
-                      labelGrupo:  'Total Binni / Volt',
-                      labelTotal:  'Total em armações',
-                      outrasPct:   opData.binni.outras?.pct,
-                      outrasValor: opData.binni.outras?.valor,
-                    }}
+                    onDetailOpen={() => setBinniModalOpen(true)}
                   />
                 </div>
               ) : (
@@ -454,6 +447,35 @@ function Dashboard() {
       {/* Fechar dropdowns ao clicar fora */}
       {dropdownOpen  && <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />}
       {trimDropOpen  && <div className="fixed inset-0 z-40" onClick={() => setTrimDropOpen(false)} />}
+
+      {/* Modal Luzter */}
+      {luzterModalOpen && opData && (
+        <LuzterModal
+          open={luzterModalOpen}
+          onClose={() => setLuzterModalOpen(false)}
+          tag="KR · Luzter"
+          name="Adesão Luzter"
+          valorLuzter={opData.luzter.valorLuzter}
+          valorTotalLentes={opData.luzter.valorTotalLentes}
+          outras={opData.luzter.outras}
+          detalhes={opData.luzter.detalhes}
+        />
+      )}
+
+      {/* Modal Binni */}
+      {binniModalOpen && opData && (
+        <BinniModal
+          open={binniModalOpen}
+          onClose={() => setBinniModalOpen(false)}
+          tag="KR · Binni"
+          name="Adesão Binni / Volt"
+          valorBinni={opData.binni.valorBinni}
+          valorTotalArmacoes={opData.binni.valorTotalArmacoes}
+          outras={opData.binni.outras}
+          detalhes={opData.binni.detalhes}
+          porGrupo={opData.binni.porGrupo}
+        />
+      )}
 
       {/* Drawer de metas */}
       {metasOpen && canEditMetas && (

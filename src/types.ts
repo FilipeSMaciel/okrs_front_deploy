@@ -18,6 +18,13 @@ export interface DetalheGrife {
   pct:    number;
 }
 
+export interface BinniGrupoDetalhe {
+  valorTotal:  number;
+  valorBinni:  number;
+  outrasValor: number;
+  items:       Array<{ grife: string; valor: number }>;
+}
+
 export interface DetalheLente {
   referencia: string;
   valor:      number;
@@ -43,6 +50,7 @@ export interface DadosOperacionais {
     valorTotalArmacoes: number;
     outras:            { pct: number; valor: number } | null;
     detalhes:          DetalheGrife[];
+    porGrupo:          Record<string, BinniGrupoDetalhe> | null;
   };
 }
 
