@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ token: null, user: null });
   }, []);
 
-  const isAdmin = useCallback((minLevel: UserType = 'ADMIN_3') => {
+  const isAdmin = useCallback((minLevel: UserType = 'DIRECAO') => {
     if (!state.user) return false;
     return (LEVEL[state.user.type] ?? 0) >= (LEVEL[minLevel] ?? 0);
   }, [state.user]);

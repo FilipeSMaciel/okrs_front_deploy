@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { RefreshCw, ChevronDown, LogOut, LayoutGrid, Store, Users, Target, Map, Menu, X, Settings } from 'lucide-react';
+import { RefreshCw, ChevronDown, LogOut, LayoutGrid, Store, Target, Map, Menu, X, Settings } from 'lucide-react';
 import { getDashboard, getOperacional } from './api';
 import { KrBar } from './components/KrBar';
 import { KrRing } from './components/KrRing';
