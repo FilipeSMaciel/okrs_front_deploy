@@ -134,3 +134,18 @@ export async function updateRegiao(id: string, payload: { nome?: string; lojaIds
 export async function deleteRegiao(id: string): Promise<void> {
   await api.delete(`/auth/regioes/${id}`);
 }
+
+// ── Analytics (TI) ────────────────────────────────────────────────────────────
+export interface AnalyticsData {
+  loginsPorDia:  { data: string; total: number }[];
+  rankingLojas:  { lojaNome: string; cnpj: string; acessos: number }[];
+  recentesMetas: { id: string; userName: string; createdAt: string; payload: unknown }[];
+  ativosHoje:    number;
+  totalLogins7d: number;
+  metaEdits7d:   number;
+}
+
+export async function getAnalytics(): Promise<AnalyticsData> {
+  const { data } = await api.get<AnalyticsData>('/auth/analytics');
+  return data;
+}

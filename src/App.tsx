@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { RefreshCw, ChevronDown, LogOut, LayoutGrid, Store, Target, Map, Menu, X, Settings } from 'lucide-react';
+import { RefreshCw, ChevronDown, LogOut, LayoutGrid, Store, Target, Map, Menu, X, Settings, Activity } from 'lucide-react';
 import { getDashboard, getOperacional } from './api';
 import { KrBar } from './components/KrBar';
 import { KrRing } from './components/KrRing';
@@ -11,6 +11,7 @@ import { LoginPage } from './pages/LoginPage';
 import { AllStoresPage } from './pages/AllStoresPage';
 import { RegionalPage } from './pages/RegionalPage';
 import { UsersPage } from './pages/UsersPage';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { useAuth } from './contexts/AuthContext';
 import type { Loja } from './types';
 
@@ -79,7 +80,7 @@ function fmtTs() {
   return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} · ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-type Tab = 'loja' | 'geral' | 'regional' | 'usuarios';
+type Tab = 'loja' | 'geral' | 'regional' | 'usuarios' | 'admin';
 
 export default function App() {
   const { user } = useAuth();
@@ -112,7 +113,9 @@ function Dashboard() {
     return 0;
   };
 
-  const [tab,            setTab]            = useState<Tab>(user?.type === 'DIRECAO' ? 'regional' : 'loja')
+  const [tab,            setTab]            = useState<Tab>(
+    user?.type === 'TI' ? 'admin' : user?.type === 'DIRECAO' ? 'regional' : 'loja'
+  )
   const [menuOpen,       setMenuOpen]       = useState(false);
   const [storeIdx,       setStoreIdx]       = useState(getInitialStoreIdx);
   const [dropdownOpen,   setDropdownOpen]   = useState(false);
@@ -173,7 +176,7 @@ function Dashboard() {
     <div className="min-h-screen bg-gray-100 font-sans">
 
       {/* NAV */}
-      <nav className="bg-ink text-white border-b border-black relative z-30">
+      <nav className="bg-ink text-white border-b border-black relative z-50">
         <div className="px-4 md:px-8 py-3.5 flex items-center gap-4">
 
           {/* Logo */}
@@ -192,6 +195,11 @@ function Dashboard() {
           {/* Tabs — desktop */}
           {(canSeeAllStores || canManageUsers) && (
             <div className="hidden md:flex items-center gap-1 bg-white/[0.06] rounded-full p-1">
+              {canManageUsers && (
+                <button onClick={() => setTab('admin')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${tab === 'admin' ? 'bg-white text-ink' : 'text-white/60 hover:text-white'}`}>
+                  <Activity size={12} /> Atividades
+                </button>
+              )}
               <button onClick={() => setTab('loja')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${tab === 'loja' ? 'bg-white text-ink' : 'text-white/60 hover:text-white'}`}>
                 <Store size={12} /> Por loja
               </button>
@@ -319,6 +327,7 @@ function Dashboard() {
               {(canSeeAllStores || canManageUsers) && (
                 <div className="px-3 py-3 border-b border-white/10 flex flex-col gap-1">
                   {[
+                    { t: 'admin'    as Tab, icon: <Activity size={15} />,   label: 'Atividades',  show: canManageUsers },
                     { t: 'loja'     as Tab, icon: <Store size={15} />,      label: 'Por loja',    show: true },
                     { t: 'geral'    as Tab, icon: <LayoutGrid size={15} />,  label: 'Visão geral', show: canSeeAllStores },
                     { t: 'regional' as Tab, icon: <Map size={15} />,         label: 'Regiões',     show: canSeeAllStores },
@@ -356,8 +365,10 @@ function Dashboard() {
       {/* PAGE */}
       <main className="max-w-[1280px] mx-auto px-4 py-5 sm:px-8 sm:py-7 pb-16">
 
-        {/* ── Tab: Usuários ── */}
-        {tab === 'usuarios' && canManageUsers ? (
+        {/* ── Tab: Atividades ── */}
+        {tab === 'admin' && canManageUsers ? (
+          <AdminDashboard />
+        ) : tab === 'usuarios' && canManageUsers ? (
           <UsersPage />
         ) : tab === 'regional' && canSeeAllStores ? (
           /* ── Tab: Regiões ── */
