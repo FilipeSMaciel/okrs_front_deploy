@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
-export type UserType = 'USER' | 'REGIONAL' | 'ADMIN_3' | 'ADMIN_2' | 'ADMIN_1';
+export type UserType = 'LOJA' | 'GERENTE' | 'DIRECAO' | 'ADMINISTRATIVO' | 'TI';
 
 export interface AuthLoja {
   id:     string;
@@ -29,7 +29,14 @@ interface AuthContextValue extends AuthState {
   isAdmin: (minLevel?: UserType) => boolean;
 }
 
-const LEVEL: Record<UserType, number> = {
+const LEVEL: Record<string, number> = {
+  // Valores novos
+  LOJA:           0,
+  GERENTE:        1,
+  DIRECAO:        2,
+  ADMINISTRATIVO: 3,
+  TI:             4,
+  // Aliases legados — suporte a tokens emitidos antes da migração
   USER:     0,
   REGIONAL: 1,
   ADMIN_3:  2,

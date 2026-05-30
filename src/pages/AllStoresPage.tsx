@@ -101,14 +101,14 @@ export function AllStoresPage({ trimestre, onSelectStore }: Props) {
     <div className="flex flex-col h-full">
 
       {/* Header */}
-      <div className="flex items-end justify-between gap-6 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1.5">
             {trimestre} · Todas as lojas
           </div>
-          <h1 className="text-[28px] font-bold text-ink leading-tight">Visão Consolidada</h1>
+          <h1 className="text-[24px] sm:text-[28px] font-bold text-ink leading-tight">Visão Consolidada</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="text-[12px] text-gray-400 font-mono">
             {comDados}/{lojas.length} lojas com dados
           </span>

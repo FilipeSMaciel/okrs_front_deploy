@@ -67,7 +67,7 @@ export interface UserApi {
   id:     string;
   name:   string;
   email:  string;
-  type:   'USER' | 'REGIONAL' | 'ADMIN_3' | 'ADMIN_2' | 'ADMIN_1';
+  type:   'LOJA' | 'GERENTE' | 'DIRECAO' | 'ADMINISTRATIVO' | 'TI';
   loja:   LojaSimples | null;
   lojas:  LojaSimples[];
   regiao: { id: string; nome: string } | null;

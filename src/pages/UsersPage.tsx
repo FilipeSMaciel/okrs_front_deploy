@@ -11,19 +11,19 @@ import { useAuth } from '../contexts/AuthContext';
 
 // ─── Labels ──────────────────────────────────────────────────────────────────
 const LEVEL_LABEL: Record<string, string> = {
-  USER:     'Usuário',
-  REGIONAL: 'Gerente Regional',
-  ADMIN_3:  'Admin · Visualizador',
-  ADMIN_2:  'Admin · Metas',
-  ADMIN_1:  'Admin · Master',
+  LOJA:          'Loja',
+  GERENTE:       'Gerente',
+  DIRECAO:       'Direção',
+  ADMINISTRATIVO:'Administrativo',
+  TI:            'TI',
 };
 
 const LEVEL_COLOR: Record<string, string> = {
-  USER:     'bg-gray-100 text-gray-600',
-  REGIONAL: 'bg-blue-50 text-blue-600',
-  ADMIN_3:  'bg-ok-soft text-ok',
-  ADMIN_2:  'bg-warn-soft text-warn',
-  ADMIN_1:  'bg-brand-tint text-brand',
+  LOJA:          'bg-gray-100 text-gray-600',
+  GERENTE:       'bg-blue-50 text-blue-600',
+  DIRECAO:       'bg-ok-soft text-ok',
+  ADMINISTRATIVO:'bg-warn-soft text-warn',
+  TI:            'bg-brand-tint text-brand',
 };
 
 // ─── Drawer de região ─────────────────────────────────────────────────────────
@@ -160,7 +160,7 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
   const [name,      setName]      = useState(user?.name     ?? '');
   const [email,     setEmail]     = useState(user?.email    ?? '');
   const [password,  setPassword]  = useState('');
-  const [type,      setType]      = useState<UserApi['type']>(user?.type ?? 'USER');
+  const [type,      setType]      = useState<UserApi['type']>(user?.type ?? 'LOJA');
   const [lojaId,    setLojaId]    = useState<string>(user?.loja?.id ?? '');
   const [regiaoId,  setRegiaoId]  = useState<string>(user?.regiao?.id ?? '');
   const [error,     setError]     = useState('');
@@ -173,24 +173,24 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
     if (!name.trim())                              return setError('Nome obrigatório.');
     if (!isEdit && !email.trim())                  return setError('E-mail obrigatório.');
     if (!isEdit && password.length < 6)            return setError('Senha mínima de 6 caracteres.');
-    if (type === 'USER'     && !lojaId)            return setError('Selecione a loja para este usuário.');
-    if (type === 'REGIONAL' && !regiaoId)          return setError('Selecione a região para este gerente.');
+    if (type === 'LOJA'    && !lojaId)   return setError('Selecione a loja para este usuário.');
+    if (type === 'GERENTE' && !regiaoId) return setError('Selecione a região para este gerente.');
 
     setSaving(true);
     try {
       if (isEdit) {
         const payload: UpdateUserPayload = {
           name, type,
-          lojaId:   type === 'USER'     ? (lojaId  || null) : null,
-          regiaoId: type === 'REGIONAL' ? (regiaoId || null) : null,
+          lojaId:   type === 'LOJA'    ? (lojaId   || null) : null,
+          regiaoId: type === 'GERENTE' ? (regiaoId || null) : null,
         };
         if (password) payload.password = password;
         await updateUser(user.id, payload);
       } else {
         const payload: CreateUserPayload = {
           name, email, password, type,
-          lojaId:   type === 'USER'     ? (lojaId  || null) : null,
-          regiaoId: type === 'REGIONAL' ? (regiaoId || null) : null,
+          lojaId:   type === 'LOJA'    ? (lojaId   || null) : null,
+          regiaoId: type === 'GERENTE' ? (regiaoId || null) : null,
         };
         await createUser(payload);
       }
@@ -257,36 +257,42 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
           <div>
             <label className="block text-[12px] font-semibold text-ink mb-1.5">Nível de acesso</label>
             <div className="grid grid-cols-2 gap-2">
-              {(['USER', 'REGIONAL', 'ADMIN_3', 'ADMIN_2', 'ADMIN_1'] as const).map(lvl => (
+              {([
+                { key: 'LOJA',          desc: 'Acessa somente a loja vinculada'              },
+                { key: 'GERENTE',       desc: 'Visualiza as lojas da sua região'              },
+                { key: 'DIRECAO',       desc: 'Todas as lojas + comparativo de regiões'       },
+                { key: 'ADMINISTRATIVO',desc: 'Direção + configura metas por loja'            },
+                { key: 'TI',            desc: 'Acesso total · gerencia usuários e regiões'    },
+              ] as const).map(({ key, desc }) => (
                 <button
-                  key={lvl}
+                  key={key}
                   type="button"
-                  onClick={() => setType(lvl)}
+                  onClick={() => setType(key)}
                   className={`px-3 py-2.5 rounded-lg text-left border-2 transition-colors ${
-                    lvl === 'ADMIN_1' ? 'col-span-2' : ''
+                    key === 'TI' ? 'col-span-2' : ''
                   } ${
-                    type === lvl
+                    type === key
                       ? 'border-brand bg-brand-tint'
                       : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
-                  <div className="text-[12px] font-bold text-ink">{lvl.replace('_', ' ')}</div>
-                  <div className="text-[10.5px] text-gray-500 leading-tight mt-0.5">{LEVEL_LABEL[lvl]}</div>
+                  <div className="text-[12px] font-bold text-ink">{LEVEL_LABEL[key]}</div>
+                  <div className="text-[10.5px] text-gray-500 leading-tight mt-0.5">{desc}</div>
                 </button>
               ))}
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg px-3.5 py-3 text-[11.5px] text-gray-500 leading-relaxed">
-            {type === 'USER'     && 'Visualiza somente os KRs da loja vinculada. Sem acesso a outras lojas.'}
-            {type === 'REGIONAL' && 'Visualiza os KRs das lojas da região vinculada. Acesso somente leitura.'}
-            {type === 'ADMIN_3'  && 'Visualiza todas as lojas e o painel consolidado. Somente leitura.'}
-            {type === 'ADMIN_2'  && 'Tudo do Visualizador + pode configurar e atualizar metas por loja.'}
-            {type === 'ADMIN_1'  && 'Acesso completo: metas, visão geral e gerenciamento de usuários.'}
+            {type === 'LOJA'          && 'Visualiza somente os KRs da loja vinculada. Sem acesso a outras lojas.'}
+            {type === 'GERENTE'       && 'Visualiza os KRs das lojas da sua região. Acesso somente leitura.'}
+            {type === 'DIRECAO'       && 'Visualiza todas as lojas, painel consolidado e comparativo de regiões. Somente leitura.'}
+            {type === 'ADMINISTRATIVO'&& 'Tudo da Direção + pode configurar e atualizar metas por loja.'}
+            {type === 'TI'            && 'Acesso completo: metas, visão geral, regiões e gerenciamento de usuários.'}
           </div>
 
-          {/* Loja vinculada (USER) */}
-          {type === 'USER' && (
+          {/* Loja vinculada (LOJA) */}
+          {type === 'LOJA' && (
             <div>
               <label className="block text-[12px] font-semibold text-ink mb-1.5">
                 Loja vinculada <span className="text-brand">*</span>
@@ -303,8 +309,8 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
             </div>
           )}
 
-          {/* Região vinculada (REGIONAL) */}
-          {type === 'REGIONAL' && (
+          {/* Região vinculada (GERENTE) */}
+          {type === 'GERENTE' && (
             <div className="space-y-3">
               <div>
                 <label className="block text-[12px] font-semibold text-ink mb-1.5">
@@ -431,9 +437,9 @@ export function UsersPage() {
       <div className="flex items-end justify-between gap-6 mb-6">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1.5">
-            Administração · Sistema
+            Configurações · Sistema
           </div>
-          <h1 className="text-[28px] font-bold text-ink">Gerenciar Usuários</h1>
+          <h1 className="text-[28px] font-bold text-ink">Configurações</h1>
         </div>
         <div className="flex items-center gap-2">
           {tab === 'regioes' && (
@@ -528,16 +534,16 @@ export function UsersPage() {
 
                   <td className="px-4 py-3.5">
                     <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${LEVEL_COLOR[u.type]}`}>
-                      {u.type === 'ADMIN_1'  ? <ShieldCheck size={10} /> :
-                       u.type === 'USER'     ? <Eye size={10} />         :
-                       u.type === 'REGIONAL' ? <MapPin size={10} />      :
-                                              <Users size={10} />}
+                      {u.type === 'TI'      ? <ShieldCheck size={10} /> :
+                       u.type === 'LOJA'    ? <Eye size={10} />         :
+                       u.type === 'GERENTE' ? <MapPin size={10} />      :
+                                             <Users size={10} />}
                       {LEVEL_LABEL[u.type]}
                     </span>
                   </td>
 
                   <td className="px-4 py-3.5 text-[13px] text-gray-600">
-                    {u.type === 'REGIONAL' ? (
+                    {u.type === 'GERENTE' ? (
                       u.regiao ? (
                         <div>
                           <div className="flex items-center gap-1.5">

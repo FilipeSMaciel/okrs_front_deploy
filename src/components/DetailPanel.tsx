@@ -63,7 +63,7 @@ export function DetailPanel({
       />
 
       {/* painel */}
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-[440px] max-w-full bg-white shadow-2xl flex flex-col animate-slide-in">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[440px] bg-white shadow-2xl flex flex-col animate-slide-in">
 
         {/* header */}
         <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4">
