@@ -64,9 +64,10 @@ export interface DashboardData {
 }
 
 export interface Loja {
-  sigla: string;
-  name:  string;
-  cnpj:  string;
+  sigla:  string;
+  name:   string;
+  cnpj:   string;
+  cidade: string | null;
 }
 
 // Resposta do GET /geral/:trimestre

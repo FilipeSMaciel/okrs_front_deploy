@@ -147,7 +147,10 @@ export function AdminDashboard() {
                       style={{ width: `${(l.acessos / maxAcessos) * 100}%` }}
                     />
                     <div className="relative flex items-center justify-between px-2.5 py-2">
-                      <span className="text-[12px] font-semibold text-ink truncate">{l.lojaNome}</span>
+                      <div className="min-w-0">
+                        <div className="text-[12px] font-semibold text-ink truncate">{l.lojaNome}</div>
+                        {l.cidade && <div className="text-[10px] text-gray-400">{l.cidade}</div>}
+                      </div>
                       <span className="text-[11px] font-bold text-blue-500 ml-2 shrink-0">{l.acessos} login{l.acessos !== 1 ? 's' : ''}</span>
                     </div>
                   </div>

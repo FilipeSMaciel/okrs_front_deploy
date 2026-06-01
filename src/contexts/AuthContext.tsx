@@ -7,6 +7,7 @@ export interface AuthLoja {
   name:   string;
   cnpj:   string;
   cidade: string | null;
+  sigla:  string;
 }
 
 export interface AuthUser {
@@ -19,8 +20,7 @@ export interface AuthUser {
 }
 
 interface AuthState {
-  user:  AuthUser | null;
-  token: string | null;
+  user: AuthUser | null;
 }
 
 interface AuthContextValue extends AuthState {
@@ -44,8 +44,7 @@ const LEVEL: Record<string, number> = {
   ADMIN_1:  4,
 };
 
-const TOKEN_KEY  = 'okrs_token';
-const USER_KEY   = 'okrs_user';
+const USER_KEY = 'okrs_user';
 const API_BASE   = import.meta.env.VITE_API_URL ?? 'https://okrsapideploy.vercel.app';
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -53,50 +52,45 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>(() => {
     try {
-      const token = localStorage.getItem(TOKEN_KEY);
-      const user  = localStorage.getItem(USER_KEY);
-      if (token && user) return { token, user: JSON.parse(user) };
+      const user = localStorage.getItem(USER_KEY);
+      if (user) return { user: JSON.parse(user) };
     } catch {}
-    return { token: null, user: null };
+    return { user: null };
   });
 
-  // Valida o token ao carregar (pode ter expirado)
+  // Valida sessão ao carregar — cookie HttpOnly é enviado automaticamente
   useEffect(() => {
-    if (!state.token) return;
-    fetch(`${API_BASE}/auth/me`, {
-      headers: { Authorization: `Bearer ${state.token}` },
-    })
+    fetch(`${API_BASE}/auth/me`, { credentials: 'include' })
       .then(r => { if (!r.ok) throw new Error('expired'); return r.json(); })
       .then((user: AuthUser) => {
-        setState(s => ({ ...s, user }));
+        setState({ user });
         localStorage.setItem(USER_KEY, JSON.stringify(user));
       })
       .catch(() => {
-        localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
-        setState({ token: null, user: null });
+        setState({ user: null });
       });
   }, []); // só na montagem
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email, password }),
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      body:        JSON.stringify({ email, password }),
+      credentials: 'include',
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? 'Falha no login.');
 
-    localStorage.setItem(TOKEN_KEY, data.token);
     localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-    setState({ token: data.token, user: data.user });
+    setState({ user: data.user });
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
+    fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
     localStorage.removeItem(USER_KEY);
-    setState({ token: null, user: null });
+    setState({ user: null });
   }, []);
 
   const isAdmin = useCallback((minLevel: UserType = 'DIRECAO') => {

@@ -58,15 +58,16 @@ export function DetailPanel({
     <>
       {/* backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]"
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
         onClick={onClose}
       />
 
-      {/* painel */}
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[440px] bg-white shadow-2xl flex flex-col animate-slide-in">
+      {/* modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-[520px] max-h-[88vh] flex flex-col pointer-events-auto">
 
         {/* header */}
-        <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4 shrink-0">
           <div>
             <div className="text-[10.5px] font-bold tracking-widest uppercase text-brand">{tag}</div>
             <h2 className="text-[20px] font-bold text-ink mt-0.5 leading-tight">{name}</h2>
@@ -160,6 +161,7 @@ export function DetailPanel({
             <span className="text-[14px] font-bold text-ink">{fmtR$(valorTotal)}</span>
           </div>
         </div>
+      </div>
       </div>
     </>
   );

@@ -1,12 +1,9 @@
 import axios from 'axios';
 import type { DashboardData, DadosOperacionais, GeralResponse } from './types';
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'https://okrsapideploy.vercel.app' });
-
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('okrs_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
+const api = axios.create({
+  baseURL:         import.meta.env.VITE_API_URL || 'https://okrsapideploy.vercel.app',
+  withCredentials: true,
 });
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -55,6 +52,7 @@ export interface LojaSimples {
   name:   string;
   cnpj:   string;
   cidade: string | null;
+  sigla:  string;
 }
 
 export interface RegiaoApi {
@@ -138,7 +136,7 @@ export async function deleteRegiao(id: string): Promise<void> {
 // ── Analytics (TI) ────────────────────────────────────────────────────────────
 export interface AnalyticsData {
   loginsPorDia:  { data: string; total: number }[];
-  rankingLojas:  { lojaNome: string; cnpj: string; acessos: number }[];
+  rankingLojas:  { lojaNome: string; cnpj: string; cidade: string | null; acessos: number }[];
   recentesMetas: { id: string; userName: string; createdAt: string; payload: unknown }[];
   ativosHoje:    number;
   totalLogins7d: number;

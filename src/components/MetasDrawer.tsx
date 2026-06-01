@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Target, Save, CheckCircle } from 'lucide-react';
 import { saveMetas, saveMetasOp } from '../api';
 import type { DadosFinanceiros } from '../types';
@@ -58,54 +58,81 @@ function FieldNum({
 }
 
 export function MetasDrawer({ cnpj, trimestre, storeName, financeiro, onClose, onSaved }: Props) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+  // ── Valores iniciais (para detectar mudanças) ────────────────────────────────
+  const initFin = {
+    cartaoMeta:        String(financeiro?.cartaoPct.meta     ?? 50),
+    avistaMeta:        String(financeiro?.avistaPct.meta     ?? 30),
+    ticketMeta:        String(financeiro?.ticketMedio.meta   ?? 600),
+    inadimplenciaMeta: String(financeiro?.inadimplencia.meta ?? 5),
+  };
+  const initOp = { garantiasMeta: '5', luzterMeta: '85', binniMeta: '35' };
+
   // ── Estado: metas financeiras ────────────────────────────────────────────────
-  const [cartaoMeta,       setCartaoMeta]       = useState(String(financeiro?.cartaoPct.meta     ?? 50));
-  const [avistaMeta,       setAvistaMeta]       = useState(String(financeiro?.avistaPct.meta     ?? 30));
-  const [ticketMeta,       setTicketMeta]       = useState(String(financeiro?.ticketMedio.meta   ?? 600));
-  const [inadimplenciaMeta,setInadimplenciaMeta]= useState(String(financeiro?.inadimplencia.meta ?? 5));
+  const [cartaoMeta,        setCartaoMeta]        = useState(initFin.cartaoMeta);
+  const [avistaMeta,        setAvistaMeta]        = useState(initFin.avistaMeta);
+  const [ticketMeta,        setTicketMeta]        = useState(initFin.ticketMeta);
+  const [inadimplenciaMeta, setInadimplenciaMeta] = useState(initFin.inadimplenciaMeta);
 
   // ── Estado: metas operacionais ───────────────────────────────────────────────
-  const [garantiasMeta, setGarantiasMeta] = useState('5');
-  const [luzterMeta,    setLuzterMeta]    = useState('85');
-  const [binniMeta,     setBinniMeta]     = useState('35');
+  const [garantiasMeta, setGarantiasMeta] = useState(initOp.garantiasMeta);
+  const [luzterMeta,    setLuzterMeta]    = useState(initOp.luzterMeta);
+  const [binniMeta,     setBinniMeta]     = useState(initOp.binniMeta);
 
-  const [saving,   setSaving]   = useState(false);
-  const [saved,    setSaved]    = useState(false);
-  const [error,    setError]    = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved,  setSaved]  = useState(false);
+  const [error,  setError]  = useState('');
 
   async function handleSave() {
     setError('');
     setSaving(true);
     setSaved(false);
 
-    const fin = {
-      cartaoMeta:        Number(cartaoMeta),
-      avistaMeta:        Number(avistaMeta),
-      ticketMeta:        Number(ticketMeta),
-      inadimplenciaMeta: Number(inadimplenciaMeta),
-    };
-    const op = {
-      garantiasMeta: Number(garantiasMeta),
-      luzterMeta:    Number(luzterMeta),
-      binniMeta:     Number(binniMeta),
-    };
+    // Só chama o endpoint se algum valor daquele bloco mudou
+    const finChanged =
+      cartaoMeta        !== initFin.cartaoMeta        ||
+      avistaMeta        !== initFin.avistaMeta        ||
+      ticketMeta        !== initFin.ticketMeta        ||
+      inadimplenciaMeta !== initFin.inadimplenciaMeta;
 
-    console.log('[MetasDrawer] salvando →', { cnpj, trimestre, fin, op });
+    const opChanged =
+      garantiasMeta !== initOp.garantiasMeta ||
+      luzterMeta    !== initOp.luzterMeta    ||
+      binniMeta     !== initOp.binniMeta;
+
+    if (!finChanged && !opChanged) {
+      setError('Nenhuma alteração detectada.');
+      setSaving(false);
+      return;
+    }
 
     try {
-      const [resF, resOp] = await Promise.all([
-        saveMetas(cnpj, trimestre, fin),
-        saveMetasOp(cnpj, trimestre, op),
+      await Promise.all([
+        finChanged ? saveMetas(cnpj, trimestre, {
+          cartaoMeta:        Number(cartaoMeta),
+          avistaMeta:        Number(avistaMeta),
+          ticketMeta:        Number(ticketMeta),
+          inadimplenciaMeta: Number(inadimplenciaMeta),
+        }) : Promise.resolve(),
+        opChanged ? saveMetasOp(cnpj, trimestre, {
+          garantiasMeta: Number(garantiasMeta),
+          luzterMeta:    Number(luzterMeta),
+          binniMeta:     Number(binniMeta),
+        }) : Promise.resolve(),
       ]);
-      console.log('[MetasDrawer] ✓ financeiro:', resF);
-      console.log('[MetasDrawer] ✓ operacional:', resOp);
       setSaved(true);
       onSaved?.();
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
-      const msg = err.response?.data?.error ?? err.message ?? 'Erro ao salvar metas.';
-      console.error('[MetasDrawer] ERRO:', err.response?.status, err.response?.data ?? err.message);
-      setError(msg);
+      setError(err.response?.data?.error ?? err.message ?? 'Erro ao salvar metas.');
     } finally {
       setSaving(false);
     }
@@ -113,8 +140,9 @@ export function MetasDrawer({ cnpj, trimestre, storeName, financeiro, onClose, o
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[400px] bg-white shadow-2xl flex flex-col animate-slide-in">
+      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-[480px] max-h-[88vh] flex flex-col pointer-events-auto">
 
         {/* Header */}
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
@@ -251,6 +279,7 @@ export function MetasDrawer({ cnpj, trimestre, storeName, financeiro, onClose, o
             )}
           </button>
         </div>
+      </div>
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, X, ShieldCheck, Eye, Users, MapPin, Store } from 'lucide-react';
 import {
@@ -41,6 +41,16 @@ function RegiaoDrawer({ regiao, lojas, onClose, onSaved }: RegiaoDrawerProps) {
   const [error,   setError]   = useState('');
   const [saving,  setSaving]  = useState(false);
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+
   function toggleLoja(id: string) {
     setLojaIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   }
@@ -66,9 +76,10 @@ function RegiaoDrawer({ regiao, lojas, onClose, onSaved }: RegiaoDrawerProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-[420px] max-w-full bg-white shadow-2xl flex flex-col animate-slide-in">
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-[480px] max-h-[88vh] flex flex-col pointer-events-auto">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
           <div>
             <div className="text-[10.5px] font-bold tracking-widest uppercase text-blue-500">
               {isEdit ? 'Editar região' : 'Nova região'}
@@ -99,7 +110,7 @@ function RegiaoDrawer({ regiao, lojas, onClose, onSaved }: RegiaoDrawerProps) {
                 ({lojaIds.length} selecionada{lojaIds.length !== 1 ? 's' : ''})
               </span>
             </label>
-            <div className="border border-gray-200 rounded-lg overflow-hidden max-h-64 overflow-y-auto divide-y divide-gray-100">
+            <div className="border border-gray-200 rounded-lg overflow-hidden max-h-52 overflow-y-auto divide-y divide-gray-100">
               {lojas.map(l => {
                 const checked = lojaIds.includes(l.id);
                 return (
@@ -132,7 +143,7 @@ function RegiaoDrawer({ regiao, lojas, onClose, onSaved }: RegiaoDrawerProps) {
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+        <div className="px-6 py-4 border-t border-gray-100 flex gap-3 shrink-0">
           <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-[13px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
             Cancelar
           </button>
@@ -140,6 +151,7 @@ function RegiaoDrawer({ regiao, lojas, onClose, onSaved }: RegiaoDrawerProps) {
             {saving ? 'Salvando…' : isEdit ? 'Salvar alterações' : 'Criar região'}
           </button>
         </div>
+      </div>
       </div>
     </>
   );
@@ -165,6 +177,16 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
   const [regiaoId,  setRegiaoId]  = useState<string>(user?.regiao?.id ?? '');
   const [error,     setError]     = useState('');
   const [saving,    setSaving]    = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
 
   const regiaoSelecionada = regioes.find(r => r.id === regiaoId) ?? null;
 
@@ -204,10 +226,11 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-[420px] max-w-full bg-white shadow-2xl flex flex-col animate-slide-in">
+      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-[520px] max-h-[88vh] flex flex-col pointer-events-auto">
 
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
           <div>
             <div className="text-[10.5px] font-bold tracking-widest uppercase text-brand">
               {isEdit ? 'Editar usuário' : 'Novo usuário'}
@@ -359,7 +382,7 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+        <div className="px-6 py-4 border-t border-gray-100 flex gap-3 shrink-0">
           <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-[13px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
             Cancelar
           </button>
@@ -367,6 +390,7 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
             {saving ? 'Salvando…' : isEdit ? 'Salvar alterações' : 'Criar usuário'}
           </button>
         </div>
+      </div>
       </div>
     </>
   );
