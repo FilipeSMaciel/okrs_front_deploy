@@ -44,12 +44,6 @@ function fmtTrimestreLabel(t: string): string {
   return `${ord} Tri · 20${m[2]}`;
 }
 
-function fmtTrimestreHeader(t: string): string {
-  const m = t.match(/^(\d)T(\d{2})$/);
-  if (!m) return t;
-  const ord = ['1º', '2º', '3º', '4º'][parseInt(m[1]) - 1] ?? `${m[1]}º`;
-  return `${ord} Trimestre · 20${m[2]}`;
-}
 
 function fmtMoeda(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 });
