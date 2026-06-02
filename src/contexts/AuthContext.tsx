@@ -11,12 +11,13 @@ export interface AuthLoja {
 }
 
 export interface AuthUser {
-  id:    string;
-  name:  string;
-  email: string;
-  type:  UserType;
-  loja:  AuthLoja | null;
-  lojas: AuthLoja[]; // lojas do REGIONAL; vazio para outros tipos
+  id:                string;
+  name:              string;
+  email:             string;
+  type:              UserType;
+  loja:              AuthLoja | null;
+  lojas:             AuthLoja[]; // lojas do REGIONAL; vazio para outros tipos
+  showActivityPanel: boolean;
 }
 
 interface AuthState {

@@ -92,7 +92,7 @@ export default function App() {
         <Route path="geral"    element={<GeralRoute />} />
         <Route path="regional" element={<RegionalRoute />} />
         <Route path="usuarios" element={<UsersPage />} />
-        <Route path="admin"    element={<AdminDashboard />} />
+        <Route path="admin"    element={<AdminRoute />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -102,9 +102,15 @@ export default function App() {
 function DefaultRoute() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/" replace />;
-  if (user.type === 'TI') return <Navigate to="/admin" replace />;
+  if (user.type === 'TI') return <Navigate to={user.showActivityPanel ? '/admin' : '/usuarios'} replace />;
   if (user.type === 'DIRECAO') return <Navigate to="/regional" replace />;
   return <Navigate to="/loja" replace />;
+}
+
+function AdminRoute() {
+  const { user } = useAuth();
+  if (!user?.showActivityPanel) return <Navigate to="/" replace />;
+  return <AdminDashboard />;
 }
 
 function GeralRoute() {
@@ -123,9 +129,10 @@ function Dashboard() {
   const navigate  = useNavigate();
   const location  = useLocation();
 
-  const canSeeAllStores = isAdmin('DIRECAO');
-  const canManageUsers  = isAdmin('TI');
-  const isLojaRoute     = location.pathname === '/loja';
+  const canSeeAllStores    = isAdmin('DIRECAO');
+  const canManageUsers     = isAdmin('TI');
+  const canSeeActivities   = !!user?.showActivityPanel;
+  const isLojaRoute        = location.pathname === '/loja';
 
   const { data: allLojas } = useQuery({
     queryKey: ['lojas'],
@@ -220,7 +227,7 @@ function Dashboard() {
           <div className="hidden md:flex items-center gap-1">
 
             {/* Tabs de navegação */}
-            {canManageUsers && (
+            {canSeeActivities && (
               <NavLink to="/admin" className={({ isActive }) => tabCls(isActive)}>
                 <Activity size={12} /> Atividades
               </NavLink>
@@ -323,7 +330,7 @@ function Dashboard() {
               {(canSeeAllStores || canManageUsers) && (
                 <div className="px-3 py-3 border-b border-white/10 flex flex-col gap-1">
                   {[
-                    { to: '/admin',    icon: <Activity size={15} />,   label: 'Atividades',    show: canManageUsers  },
+                    { to: '/admin',    icon: <Activity size={15} />,   label: 'Atividades',    show: canSeeActivities },
                     { to: '/loja',     icon: <Store size={15} />,      label: 'Por loja',      show: true            },
                     { to: '/geral',    icon: <LayoutGrid size={15} />, label: 'Visão geral',   show: canSeeAllStores },
                     { to: '/regional', icon: <Map size={15} />,        label: 'Regiões',       show: canSeeAllStores },

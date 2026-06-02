@@ -68,26 +68,29 @@ export interface UserApi {
   type:   'LOJA' | 'GERENTE' | 'DIRECAO' | 'ADMINISTRATIVO' | 'TI';
   loja:   LojaSimples | null;
   lojas:  LojaSimples[];
-  regiao: { id: string; nome: string } | null;
+  regiao:            { id: string; nome: string } | null;
+  showActivityPanel: boolean;
 }
 
 export interface CreateUserPayload {
-  name:      string;
-  email:     string;
-  password:  string;
-  type:      UserApi['type'];
-  lojaId?:   string | null;
-  lojaIds?:  string[];
-  regiaoId?: string | null;
+  name:               string;
+  email:              string;
+  password:           string;
+  type:               UserApi['type'];
+  lojaId?:            string | null;
+  lojaIds?:           string[];
+  regiaoId?:          string | null;
+  showActivityPanel?: boolean;
 }
 
 export interface UpdateUserPayload {
-  name?:     string;
-  password?: string;
-  type?:     UserApi['type'];
-  lojaId?:   string | null;
-  lojaIds?:  string[];
-  regiaoId?: string | null;
+  name?:               string;
+  password?:           string;
+  type?:               UserApi['type'];
+  lojaId?:             string | null;
+  lojaIds?:            string[];
+  regiaoId?:           string | null;
+  showActivityPanel?:  boolean;
 }
 
 export async function getUsers(): Promise<UserApi[]> {

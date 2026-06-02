@@ -169,14 +169,15 @@ interface DrawerProps {
 function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
   const isEdit = !!user;
 
-  const [name,      setName]      = useState(user?.name     ?? '');
-  const [email,     setEmail]     = useState(user?.email    ?? '');
-  const [password,  setPassword]  = useState('');
-  const [type,      setType]      = useState<UserApi['type']>(user?.type ?? 'LOJA');
-  const [lojaId,    setLojaId]    = useState<string>(user?.loja?.id ?? '');
-  const [regiaoId,  setRegiaoId]  = useState<string>(user?.regiao?.id ?? '');
-  const [error,     setError]     = useState('');
-  const [saving,    setSaving]    = useState(false);
+  const [name,              setName]              = useState(user?.name     ?? '');
+  const [email,             setEmail]             = useState(user?.email    ?? '');
+  const [password,          setPassword]          = useState('');
+  const [type,              setType]              = useState<UserApi['type']>(user?.type ?? 'LOJA');
+  const [lojaId,            setLojaId]            = useState<string>(user?.loja?.id ?? '');
+  const [regiaoId,          setRegiaoId]          = useState<string>(user?.regiao?.id ?? '');
+  const [showActivityPanel, setShowActivityPanel] = useState<boolean>(user?.showActivityPanel ?? false);
+  const [error,             setError]             = useState('');
+  const [saving,            setSaving]            = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -203,16 +204,18 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
       if (isEdit) {
         const payload: UpdateUserPayload = {
           name, type,
-          lojaId:   type === 'LOJA'    ? (lojaId   || null) : null,
-          regiaoId: type === 'GERENTE' ? (regiaoId || null) : null,
+          lojaId:            type === 'LOJA'    ? (lojaId   || null) : null,
+          regiaoId:          type === 'GERENTE' ? (regiaoId || null) : null,
+          showActivityPanel,
         };
         if (password) payload.password = password;
         await updateUser(user.id, payload);
       } else {
         const payload: CreateUserPayload = {
           name, email, password, type,
-          lojaId:   type === 'LOJA'    ? (lojaId   || null) : null,
-          regiaoId: type === 'GERENTE' ? (regiaoId || null) : null,
+          lojaId:            type === 'LOJA'    ? (lojaId   || null) : null,
+          regiaoId:          type === 'GERENTE' ? (regiaoId || null) : null,
+          showActivityPanel,
         };
         await createUser(payload);
       }
@@ -259,7 +262,7 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
             <div>
               <label className="block text-[12px] font-semibold text-ink mb-1.5">E-mail</label>
               <input
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
+                type="email" value={email} onChange={e => setEmail(e.target.value.toLowerCase())}
                 placeholder="email@bilharva.com.br"
                 className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 transition-colors"
               />
@@ -374,6 +377,23 @@ function UserDrawer({ user, lojas, regioes, onClose, onSaved }: DrawerProps) {
               )}
             </div>
           )}
+
+          {/* Painel de Atividades */}
+          <div
+            className="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-3 cursor-pointer select-none"
+            onClick={() => setShowActivityPanel(v => !v)}
+          >
+            <div>
+              <div className="text-[12px] font-semibold text-ink">Painel de Atividades</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">Libera acesso ao painel de monitoramento de logins e edições</div>
+            </div>
+            <div
+              className={`relative rounded-full transition-colors shrink-0 ml-4 ${showActivityPanel ? 'bg-brand' : 'bg-gray-200'}`}
+              style={{ height: '22px', width: '40px' }}
+            >
+              <div className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow transition-transform ${showActivityPanel ? 'translate-x-[19px]' : 'translate-x-[3px]'}`} />
+            </div>
+          </div>
 
           {error && (
             <div className="bg-brand-tint border border-brand/20 rounded-lg px-3.5 py-2.5 text-[13px] text-brand font-medium">
